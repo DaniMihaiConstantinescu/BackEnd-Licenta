@@ -242,6 +242,39 @@ router
     });
     
 
+// --------- Toggle scene on/off ---------   
+router.post('/toggle/:userId/:sceneId', async (req, res) => {
+  const userId = req.params.userId;
+  const sceneId = req.params.sceneId;
+
+  try {
+    const userSceneRef = ref(dbRef, `users/${userId}/scenes/${sceneId}`);
+
+    const snapshot = await get(userSceneRef);
+    const scene = snapshot.val();
+
+    if (scene) {
+      // Toggle the isActive property
+      scene.isActive = !scene.isActive;
+
+      // Update the scene in the database
+      await set(userSceneRef, scene);
+
+      res.json({ 
+        message: `Scene with ID ${sceneId} toggled for user with ID ${userId}.`,
+        scene: scene 
+      });
+    } else {
+      res.status(404).send(`Scene with ID ${sceneId} not found.`);
+    }
+    
+  } catch (error) {
+    console.error('Error fetching scene:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 // --------- Add device to scene ---------   
 router.post('/:userId/:sceneId/add-device', async (req, res) => {
   const userId = req.params.userId;
@@ -256,7 +289,6 @@ router.post('/:userId/:sceneId/add-device', async (req, res) => {
     res.status(400).json({ error: result.message });
   }
 });
-
 
 // --------- Remove device from scene ---------   
 router.post('/:userId/:sceneId/:macAddress', async (req, res) => {
@@ -276,6 +308,8 @@ router.post('/:userId/:sceneId/:macAddress', async (req, res) => {
     }
   }
 });
+
+
     
 
 module.exports = router

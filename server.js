@@ -5,4 +5,4 @@ const port = 5000
 const userRouter = require('./routes/scenes')
 
 app.use('/scenes', userRouter)
-app.listen(port)
+app.listen(port, () => console.log(`Server started on port ${port}`))

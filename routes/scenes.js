@@ -1,63 +1,48 @@
 const express = require('express')
 const router = express.Router()
 
-const { child, get, ref, onValue } = require("firebase/database");
-const { dbRef } = require("../firebase");
-
-router.get('/', async (req, res) => {
-
-    console.log();
-    console.log("------------------------ Users ------------------------");
-    console.log();
-
-    get(child(dbRef, `users`)).then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log(snapshot.val());
-        } else {
-          console.log("No data available");
-        }
-      }).catch((error) => {
-        console.error(error);
-      });
+const { onValue, ref } = require('firebase/database');
+const { dbRef } = require('../firebase');
 
 
+// --------- Get all the scenes for a user --------- 
+router.get('/:userId', async (req, res) => {
+  
+  const userId = req.params.userId;
+  try {
+    const usersRef = ref(dbRef, 'users');
 
-    // try {
-    //     const usersRef = child(dbRef, '/users');
-    //     const usersSnapshot = await get(usersRef);
-    
-    //     if (usersSnapshot.exists()) {
-    //       const usersData = usersSnapshot.val();
-    //       console.log(usersData);
-    //       res.send(usersData);
-    //     } else {
-    //       console.log('No data in the "users" collection');
-    //       res.status(404).send('No data in the "users" collection');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error while fetching the database:', error);
-    //     res.status(500).send('Internal Server Error');
-    // }
+    onValue(usersRef, (snapshot) => {
+      const users = snapshot.val();
 
+      const user = users.find((user) => user.id === parseInt(userId));
 
-    res.send("All scenes")
+      if (user) {
+        const scenes = user.scenes;
+        // console.log(`Scenes for User ID ${userId}: ${JSON.stringify(scenes)}`);
+        res.json(scenes); 
+      } else {
+        // console.log(`User with ID ${userId} not found.`);
+        res.status(404).send(`User with ID ${userId} not found.`);
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user scenes:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
-})
-
-router.get('/:id', (req, res) => {
-    res.send("Get scene with the id " + req.params.id)
-})
 
 router
-    .route('/:id')
+    .route('/:userId/:sceneId')
     .get((req, res) => {
-        res.send("Get scene with the id " + req.params.id)
+      res.send("Get scene with the id " + req.params.sceneId + " for the user with the id " + req.params.userId )
     })
     .put((req, res) => {
-        res.send("Update scene with the id " + req.params.id)
+      res.send("Update scene with the id " + req.params.sceneId + " for the user with the id " + req.params.userId )
     })
     .delete((req, res) => {
-        res.send("Delete scene with the id " + req.params.id)
+      res.send("Delete scene with the id " + req.params.sceneId + " for the user with the id " + req.params.userId )
     })
 
 module.exports = router

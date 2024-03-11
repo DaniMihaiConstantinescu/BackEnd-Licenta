@@ -62,6 +62,36 @@ router
     })
 
 
+    router.get('/top3/:userId', async (req, res) => {
+      const userId = req.params.userId;
+    
+      try {
+        const usersRef = ref(dbRef, `users/${userId}/scenes`);
+    
+        onValue(usersRef, (snapshot) => {
+          const scenes = snapshot.val();
+    
+          if (scenes) {
+    
+            // Get first 3 active scenes
+            const activeScenes = Object.values(scenes).filter((scene) => scene.isActive).slice(0, 3);
+    
+            // Complete with inactive scenes if needed
+            const inactiveScenes = Object.values(scenes).filter((scene) => !scene.isActive);
+            const resultScenes = activeScenes.concat(inactiveScenes.slice(0, Math.max(0, 3 - activeScenes.length)));
+    
+            res.json(resultScenes);
+          } else {
+            res.status(404).send(`User with ID ${userId} not found or has no scenes.`);
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching user scenes:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+    
+
 // --------- Routes with userID and sceneId --------- 
 router
     .route('/:userId/:sceneId')
@@ -85,9 +115,11 @@ router
         res.status(500).send('Internal Server Error');
       }
     })
+
     .put((req, res) => {
       res.send("Update scene with the id " + req.params.sceneId + " for the user with the id " + req.params.userId )
     })
+    
     .delete((req, res) => {
       const userId = req.params.userId;
       const sceneId = req.params.sceneId;

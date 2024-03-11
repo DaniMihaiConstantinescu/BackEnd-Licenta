@@ -19,7 +19,10 @@ router
           const user = snapshot.val();
           if (user) {
             const scenes = user.scenes;
-            res.json(scenes);
+            res.json({
+              message: "Scenes data found successfully",
+              scenes: scenes
+            });
           } else {
             res.status(404).send(`User with ID ${userId} not found.`);
           }
@@ -80,7 +83,10 @@ router
             const inactiveScenes = Object.values(scenes).filter((scene) => !scene.isActive);
             const resultScenes = activeScenes.concat(inactiveScenes.slice(0, Math.max(0, 3 - activeScenes.length)));
     
-            res.json(resultScenes);
+            res.json({
+              message: "Top 3 scenes found successfully",
+              scenes: resultScenes
+            });
           } else {
             res.status(404).send(`User with ID ${userId} not found or has no scenes.`);
           }
@@ -105,7 +111,10 @@ router
         onValue(usersRef, (snapshot) => {
           const scene = snapshot.val();
           if (scene) {
-            res.json(scene);
+            res.json({
+              message: "Scene found successfully",
+              scene: scene
+            });
           } else {
             res.status(404).send(`Scene with ID ${sceneId} not found.`);
           }
@@ -132,8 +141,6 @@ router
     
           if (scenes && scenes[sceneId]) {
             delete scenes[sceneId];
-    
-            console.log(scenes);
     
             // Update db
             set(ref(dbRef, `users/${userId}/scenes`), scenes);

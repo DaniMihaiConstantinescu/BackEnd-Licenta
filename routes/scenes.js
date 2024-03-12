@@ -41,7 +41,7 @@ router
         const { devices, isActive, sceneName } = req.body;
     
         // Validate body
-        if (!devices || !isActive || !sceneName) {
+        if (!devices || isActive === undefined || !sceneName) {
           return res.status(400).json({ error: 'Invalid request body' });
         }
     
@@ -132,7 +132,7 @@ router
       const sceneId = req.params.sceneId;
       const { devices, isActive, sceneName } = req.body;
     
-      if (!devices || !isActive || !sceneName) {
+      if (!devices || isActive === undefined || !sceneName) {
         return res.status(400).json({ error: 'Invalid request body' });
       }
     

@@ -41,7 +41,7 @@ router
             const { devices, isActive, scheduleName, from, until, days } = req.body;
 
             // Validate body
-            if (!devices || !isActive || !scheduleName || !from || !until || !days) {
+            if (!devices || isActive === undefined || !scheduleName || !from || !until || !days) {
                 return res.status(400).json({ error: 'Invalid request body' });
             }
 
@@ -136,7 +136,7 @@ router
         const { devices, isActive, scheduleName, from, until, days } = req.body;
       
         // Validate request body
-        if (!devices || !isActive || !scheduleName || !from || !until || !days) {
+        if (!devices || isActive === undefined || !scheduleName || !from || !until || !days) {
           return res.status(400).json({ error: 'Invalid request body' });
         }
       

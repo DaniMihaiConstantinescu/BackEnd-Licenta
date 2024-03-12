@@ -1,9 +1,9 @@
 const { ref, set, get } = require('firebase/database');
 const { dbRef } = require('../../firebase');
 
-const deleteDeviceFromScene = async (userId, sceneId, macAddress) => {
+const deleteDevice = async (resource, userId, resourceId, macAddress) => {
     try {
-        const userSceneDevicesRef = ref(dbRef, `users/${userId}/scenes/${sceneId}/devices`);
+        const userSceneDevicesRef = ref(dbRef, `users/${userId}/${resource}/${resourceId}/devices`);
 
         const snapshot = await get(userSceneDevicesRef);
         const devices = snapshot.val();
@@ -27,4 +27,4 @@ const deleteDeviceFromScene = async (userId, sceneId, macAddress) => {
     }
 };
 
-module.exports = { deleteDeviceFromScene };
+module.exports = { deleteDevice };

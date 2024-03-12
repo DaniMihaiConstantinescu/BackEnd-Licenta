@@ -3,8 +3,8 @@ const router = express.Router()
 
 const { onValue, ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
-const { addDeviceToScene } = require('./func/addDeviceToScene')
-const { deleteDeviceFromScene } = require('./func/removeDeviceFromScene')
+const { addDevice } = require('./func/addDevice')
+const { deleteDevice } = require('./func/removeDevice')
 
 
 // --------- Routes only with userID --------- 
@@ -15,12 +15,11 @@ router
     .get(async (req, res) => {
       const userId = req.params.userId;
       try {
-        const usersRef = ref(dbRef, `users/${userId}`);
+        const usersRef = ref(dbRef, `users/${userId}/scenes`);
 
         onValue(usersRef, (snapshot) => {
-          const user = snapshot.val();
-          if (user) {
-            const scenes = user.scenes;
+          const scenes = snapshot.val();
+          if (scenes) {
             res.json({
               message: "Scenes data found successfully",
               scenes: scenes
@@ -281,7 +280,7 @@ router.post('/:userId/:sceneId/add-device', async (req, res) => {
   const sceneId = req.params.sceneId;
   const newDevice = req.body;
 
-  const result = await addDeviceToScene(userId, sceneId, newDevice);
+  const result = await addDevice('scenes' ,userId, sceneId, newDevice);
 
   if (result.success) {
     res.status(201).json({ message: result.message, scene: result.scene });
@@ -297,7 +296,7 @@ router.post('/:userId/:sceneId/:macAddress', async (req, res) => {
   const macAddress = req.params.macAddress;
 
   try {
-    const result = await deleteDeviceFromScene(userId, sceneId, macAddress);
+    const result = await deleteDevice('scenes', userId, sceneId, macAddress);
     res.status(201).json({ message: result.message, scene: result.scene });
   } catch (error) {
     if (error.message.includes('not found')) {

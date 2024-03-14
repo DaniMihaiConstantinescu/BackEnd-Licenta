@@ -1,6 +1,4 @@
 const express = require('express')
-const https = require('https');
-const fs = require('fs');
 
 const app = express()
 const port = 5000
@@ -25,15 +23,3 @@ app.use('/devices', deviceRouter)
 
 
 app.listen(port, "0.0.0.0", () => console.log(`Server started on port ${port}`))
-
-// HTTPS
-// const options = {
-//     key: fs.readFileSync('certs/private.key', 'utf8'),
-//     cert: fs.readFileSync('certs/certificate.pem', 'utf8'),
-//     passphrase: 'parola' 
-// };
-
-//   const server = https.createServer(options, app);
-//   server.listen(443, '0.0.0.0', () => {
-//     console.log('Server running on https://0.0.0.0:443/');
-//   });

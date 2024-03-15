@@ -20,9 +20,10 @@ router
         onValue(usersRef, (snapshot) => {
           const scenes = snapshot.val();
           if (scenes) {
+            const scenesArray = Object.keys(scenes).map(key => scenes[key]);
             res.json({
               message: "Scenes data found successfully",
-              scenes: scenes
+              scenes: scenesArray
             });
           } else {
             res.status(404).send(`User with ID ${userId} not found.`);

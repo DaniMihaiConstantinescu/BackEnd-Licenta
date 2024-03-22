@@ -1,0 +1,101 @@
+{
+  "devices": [
+    null,
+    {
+      "deviceMAC": "1",
+      "hubMac": "1",
+      "name": "device 1",
+      "type": "ac"
+    },
+    {
+      "deviceMAC": "2",
+      "hubMac": "1",
+      "name": "device 2",
+      "type": "light"
+    },
+    {
+      "deviceMAC": "3",
+      "hubMac": "1",
+      "name": "device 3",
+      "type": "shutter"
+    },
+    null,
+    {
+      "deviceMAC": "5",
+      "hubMac": "1",
+      "name": "device 5",
+      "type": "dehumidifier"
+    }
+  ],
+  "users": [
+    null,
+    {
+      "hubs": {
+        "-NsoBOzR0tZP7UH0BRJU": {
+          "devices": [
+            "addressamac"
+          ],
+          "hubId": "-NsoBOzR0tZP7UH0BRJU",
+          "macAddress": "Hub 1"
+        }
+      },
+      "rooms": {
+        "-Nso5BiFJGO_3_6Fp0xC": {
+          "devices": [
+            "addressamac"
+          ]
+        },
+        "-Nso6bbFnhRM-jOttLRN": {
+          "devices": [
+            "addressamac"
+          ],
+          "roomId": "-Nso6bbFnhRM-jOttLRN",
+          "roomName": "Room 1"
+        }
+      },
+      "scenes": {
+        "-NtQcYCNOAZC8HZLRoCW": {
+          "devices": [
+            {
+              "macAddress": "addressamac",
+              "settings": {
+                "temperature": "22.5"
+              }
+            },
+            {
+              "macAddress": "addressamac1",
+              "settings": {
+                "temperature": "22.5"
+              }
+            }
+          ],
+          "isActive": true,
+          "sceneId": "-NtQcYCNOAZC8HZLRoCW",
+          "sceneName": "Scene 3"
+        }
+      },
+      "schedules": {
+        "-NsoLNaH3j3bOKQeqClR": {
+          "days": [
+            0,
+            1,
+            5
+          ],
+          "devices": [
+            {
+              "macAddress": "addressamac",
+              "settings": {
+                "temperature": "22.5"
+              }
+            }
+          ],
+          "from": "15:30",
+          "isActive": true,
+          "scheduleId": "-NsoLNaH3j3bOKQeqClR",
+          "scheduleName": "Schedule 2",
+          "until": "16:00"
+        }
+      }
+    }
+  ]
+}

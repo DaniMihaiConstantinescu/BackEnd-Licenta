@@ -28,9 +28,11 @@ const addDevice = async ( resource, userId, resourceId, newDevice) => {
         if (isDeviceExists) {
           return { success: false, message: `Device with the same MAC address already exists in the ${resourceType}.` };
         }
-  
+        // console.log("2");
         scenes[resourceId].devices = [...existingDevices, newDevice];
+        // console.log("new scenes: ", scenes);
         await set(userScenesRef, scenes);
+        // console.log("after set");
   
         return { success: true, message: 'Device added successfully.', resourceType: scenes[resourceId] };
       } else {

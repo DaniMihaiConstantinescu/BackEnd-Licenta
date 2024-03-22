@@ -10,10 +10,10 @@ router.get('/', async (req, res) => {
         const devicesRef = ref(dbRef, 'devices');
         const snapshot = await get(devicesRef);
         const devices = snapshot.val() || {};
-        res.json(devices);
+        return res.status(200).json(devices);
     } catch (error) {
         console.error('Error fetching devices:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -42,10 +42,10 @@ router.post('/', async (req, res) => {
         };
         await set(devicesRef, deviceData);
 
-        res.status(201).json({ message: 'Device created successfully', device: deviceData });
+        return res.status(201).json({ message: 'Device created successfully', device: deviceData });
     } catch (error) {
         console.error('Error creating device:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 })
 
@@ -62,13 +62,13 @@ router.post('/not-in', async (req, res) => {
         const notDevicesKeys = allDeviceKeys.filter(device => !devices.some(d => d && d === device));
         const notDevices = notDevicesKeys.map(key => allDevices[key]);
 
-        res.json({
+        return res.status(200).json({
             message: "Devices found successfully",
             devices: notDevices
         });
     } catch (error) {
         console.error('Error fetching devices:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 })
 
@@ -81,13 +81,13 @@ router
             const snapshot = await get(devicesRef);
             const device = snapshot.val();
             if (device) {
-                res.json(device);
+                return res.status(200).json(device);
             } else {
-                res.status(404).json({ error: 'Device not found' });
+                return res.status(404).json({ error: 'Device not found' });
             }
         } catch (error) {
             console.error('Error fetching device:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
     })
 
@@ -107,13 +107,13 @@ router
                     type: type || device.type
                 };
                 await set(devicesRef, updatedDevice);
-                res.json({ message: 'Device patched successfully', device: updatedDevice });
+                return res.json({ message: 'Device patched successfully', device: updatedDevice });
             } else {
-                res.status(404).json({ error: 'Device not found' });
+                return res.status(404).json({ error: 'Device not found' });
             }
         } catch (error) {
             console.error('Error patching device:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
     })
     
@@ -125,13 +125,13 @@ router
             const device = snapshot.val();
             if (device) {
                 await remove(devicesRef);
-                res.json({ message: 'Device deleted successfully', device });
+                return res.json({ message: 'Device deleted successfully', device });
             } else {
-                res.status(404).json({ error: 'Device not found' });
+                return res.status(404).json({ error: 'Device not found' });
             }
         } catch (error) {
             console.error('Error deleting device:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
     })
 

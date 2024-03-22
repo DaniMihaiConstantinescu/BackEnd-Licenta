@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { onValue, ref, push, set, get } = require('firebase/database');
+const { ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
 const { addDevice } = require('./func/addDevice')
 const { deleteDevice } = require('./func/removeDevice')
@@ -16,19 +16,18 @@ router
       const userId = req.params.userId;
       try {
         const usersRef = ref(dbRef, `users/${userId}/scenes`);
+        const snapshot = await get(usersRef);
 
-        onValue(usersRef, (snapshot) => {
-          const scenes = snapshot.val();
-          if (scenes) {
-            const scenesArray = Object.keys(scenes).map(key => scenes[key]);
-            res.json({
-              message: "Scenes data found successfully",
-              scenes: scenesArray
-            });
-          } else {
-            res.status(404).send(`User with ID ${userId} not found.`);
-          }
-        });
+        const scenes = snapshot.val();
+        if (scenes) {
+          const scenesArray = Object.keys(scenes).map(key => scenes[key]);
+          res.status(200).json({
+            message: "Scenes data found successfully",
+            scenes: scenesArray
+          });
+        } else {
+          res.status(404).send(`User with ID ${userId} not found.`);
+        }
       } catch (error) {
         console.error('Error fetching user scenes:', error);
         res.status(500).send('Internal Server Error');
@@ -73,27 +72,26 @@ router.get('/top3/:userId', async (req, res) => {
 
   try {
     const usersRef = ref(dbRef, `users/${userId}/scenes`);
+    const snapshot = await get(usersRef);
 
-    onValue(usersRef, (snapshot) => {
-      const scenes = snapshot.val();
+    const scenes = snapshot.val();
 
-      if (scenes) {
+    if (scenes) {
 
-        // Get first 3 active scenes
-        const activeScenes = Object.values(scenes).filter((scene) => scene.isActive).slice(0, 3);
+      // Get first 3 active scenes
+      const activeScenes = Object.values(scenes).filter((scene) => scene.isActive).slice(0, 3);
 
-        // Complete with inactive scenes if needed
-        const inactiveScenes = Object.values(scenes).filter((scene) => !scene.isActive);
-        const resultScenes = activeScenes.concat(inactiveScenes.slice(0, Math.max(0, 3 - activeScenes.length)));
+      // Complete with inactive scenes if needed
+      const inactiveScenes = Object.values(scenes).filter((scene) => !scene.isActive);
+      const resultScenes = activeScenes.concat(inactiveScenes.slice(0, Math.max(0, 3 - activeScenes.length)));
 
-        res.json({
-          message: "Top 3 scenes found successfully",
-          scenes: resultScenes
-        });
-      } else {
-        res.status(404).send(`User with ID ${userId} not found or has no scenes.`);
-      }
-    });
+      res.json({
+        message: "Top 3 scenes found successfully",
+        scenes: resultScenes
+      });
+    } else {
+      res.status(404).send(`User with ID ${userId} not found or has no scenes.`);
+    }
   } catch (error) {
     console.error('Error fetching user scenes:', error);
     res.status(500).send('Internal Server Error');
@@ -104,29 +102,33 @@ router.get('/top3/:userId', async (req, res) => {
 // --------- Routes with userID and sceneId --------- 
 router
     .route('/:userId/:sceneId')
-    .get((req, res) => {
+    .get(async (req, res) => {
       const userId = req.params.userId;
       const sceneId = req.params.sceneId;
-
+  
       try {
-        const usersRef = ref(dbRef, `users/${userId}/scenes/${sceneId}`);
-
-        onValue(usersRef, (snapshot) => {
-          const scene = snapshot.val();
+          const usersRef = ref(dbRef, `users/${userId}/scenes/${sceneId}`);
+          const snapshot = await get(usersRef);
+  
+          let scene = snapshot.val();
           if (scene) {
-            res.json({
-              message: "Scene found successfully",
-              scene: scene
-            });
+              // Check if the 'devices' property exists, if not, create it as an empty array
+              if (!scene.hasOwnProperty('devices')) {
+                  scene.devices = [];
+              }
+              res.json({
+                  message: "Scene found successfully",
+                  scene: scene
+              });
           } else {
-            res.status(404).send(`Scene with ID ${sceneId} not found.`);
+              res.status(404).send(`Scene with ID ${sceneId} not found.`);
           }
-        });
       } catch (error) {
-        console.error('Error fetching scene:', error);
-        res.status(500).send('Internal Server Error');
+          console.error('Error fetching scene:', error);
+          res.status(500).send('Internal Server Error');
       }
     })
+  
 
     .put(async (req, res) => {
       const userId = req.params.userId;
@@ -208,31 +210,30 @@ router
       }
     })
     
-    .delete((req, res) => {
+    .delete(async (req, res) => {
       const userId = req.params.userId;
       const sceneId = req.params.sceneId;
     
       try {
         const usersRef = ref(dbRef, `users/${userId}/scenes`);
-    
-        onValue(usersRef, (snapshot) => {
-          const scenes = snapshot.val();
-    
-          if (scenes && scenes[sceneId]) {
-            delete scenes[sceneId];
-    
-            // Update db
-            set(ref(dbRef, `users/${userId}/scenes`), scenes);
-    
-            if (!res.headersSent) {
-              res.json({ message: `Scene with ID ${sceneId} deleted for user with ID ${userId}.` });
-            }
-          } else {
-            if (!res.headersSent) {
-              res.status(404).send(`Scene with ID ${sceneId} not found for user with ID ${userId}.`);
-            }
+        const snapshot = await get(usersRef);
+        
+        const scenes = snapshot.val();
+  
+        if (scenes && scenes[sceneId]) {
+          delete scenes[sceneId];
+  
+          // Update db
+          set(ref(dbRef, `users/${userId}/scenes`), scenes);
+  
+          if (!res.headersSent) {
+            res.json({ message: `Scene with ID ${sceneId} deleted for user with ID ${userId}.` });
           }
-        });
+        } else {
+          if (!res.headersSent) {
+            res.status(404).send(`Scene with ID ${sceneId} not found for user with ID ${userId}.`);
+          }
+        }
       } catch (error) {
         console.error('Error deleting scene:', error);
         if (!res.headersSent) {
@@ -276,7 +277,7 @@ router.post('/toggle/:userId/:sceneId', async (req, res) => {
 
 
 // --------- Add device to scene ---------   
-router.post('/:userId/:sceneId/add-device', async (req, res) => {
+router.post('/add-device/:userId/:sceneId', async (req, res) => {
   const userId = req.params.userId;
   const sceneId = req.params.sceneId;
   const newDevice = req.body;
@@ -291,7 +292,7 @@ router.post('/:userId/:sceneId/add-device', async (req, res) => {
 });
 
 // --------- Remove device from scene ---------   
-router.post('/:userId/:sceneId/:macAddress', async (req, res) => {
+router.delete('/remove-device/:userId/:sceneId/:macAddress', async (req, res) => {
   const userId = req.params.userId;
   const sceneId = req.params.sceneId;
   const macAddress = req.params.macAddress;

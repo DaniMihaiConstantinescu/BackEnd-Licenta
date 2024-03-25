@@ -20,9 +20,10 @@ router
 
         const schedules = snapshot.val();
         if (schedules) {
+          const schedulesArray = Object.keys(schedules).map(key => schedules[key]);
           return res.json({
             message: "Schedules data found successfully",
-            schedules: schedules
+            schedules: schedulesArray
           });
         } else {
           return res.status(404).send(`User with ID ${userId} not found.`);
@@ -114,6 +115,9 @@ router
 
         const schedule = snapshot.val();
         if (schedule) {
+          if (!schedule.hasOwnProperty('devices')) {
+            schedule.devices = [];
+          }
           return res.json({
             message: "Schedule found successfully",
             schedule: schedule
@@ -292,7 +296,7 @@ router.post('/toggle/:userId/:scheduleId', async (req, res) => {
 
 
 // --------- Add device to schedule ---------   
-router.post('/:userId/:scheduleId/add-device', async (req, res) => {
+router.post('/add-device/:userId/:scheduleId', async (req, res) => {
   const userId = req.params.userId;
   const scheduleId = req.params.scheduleId;
   const newDevice = req.body;
@@ -307,7 +311,7 @@ router.post('/:userId/:scheduleId/add-device', async (req, res) => {
 });
 
 // --------- Remove device from schedule ---------   
-router.post('/:userId/:scheduleId/:macAddress', async (req, res) => {
+router.delete('/remove-device/:userId/:scheduleId/:macAddress', async (req, res) => {
   const userId = req.params.userId;
   const scheduleId = req.params.scheduleId;
   const macAddress = req.params.macAddress;

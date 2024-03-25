@@ -129,7 +129,6 @@ router
       }
     })
   
-
     .put(async (req, res) => {
       const userId = req.params.userId;
       const sceneId = req.params.sceneId;

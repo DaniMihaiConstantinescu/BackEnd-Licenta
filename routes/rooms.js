@@ -204,7 +204,7 @@ router
 
 
 // --------- Add device to room ---------   
-router.post('/:userId/:roomId/add-device', async (req, res) => {
+router.post('/add-device/:userId/:roomId', async (req, res) => {
   const userId = req.params.userId;
   const roomId = req.params.roomId;
   const newDevice = req.body;
@@ -219,7 +219,7 @@ router.post('/:userId/:roomId/add-device', async (req, res) => {
 });
 
 // --------- Remove device from room ---------   
-router.post('/:userId/:roomId/:macAddress', async (req, res) => {
+router.delete('/remove-device/:userId/:roomId/:macAddress', async (req, res) => {
   const userId = req.params.userId;
   const roomId = req.params.roomId;
   const macAddress = req.params.macAddress;

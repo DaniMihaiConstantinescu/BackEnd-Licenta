@@ -20,7 +20,13 @@ router
 
         const rooms = snapshot.val();
         if (rooms) {
-          const roomsArray = Object.keys(rooms).map(key => rooms[key]);
+          const roomsArray = Object.keys(rooms).map(key => {
+            const room = rooms[key];
+            if (!room.hasOwnProperty('devices')) {
+              room.devices = [];
+            }
+            return room;
+          });
           return res.json({
             message: "Rooms data found successfully",
             rooms: roomsArray

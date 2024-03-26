@@ -20,9 +20,10 @@ router
 
         const rooms = snapshot.val();
         if (rooms) {
+          const roomsArray = Object.keys(rooms).map(key => rooms[key]);
           return res.json({
             message: "Rooms data found successfully",
-            rooms: rooms
+            rooms: roomsArray
           });
         } else {
           return res.status(404).send(`User with ID ${userId} not found.`);
@@ -81,6 +82,9 @@ router
 
         const room = snapshot.val();
         if (room) {
+          if (!room.hasOwnProperty('devices')) {
+            room.devices = [];
+          }
           return res.json({
             message: "Room found successfully",
             room: room

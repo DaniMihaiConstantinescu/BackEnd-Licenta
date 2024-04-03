@@ -119,6 +119,61 @@ router.get('/:userId/all-devices', async (req, res) => {
   }
 });
 
+// --------- Get all devices in hub not in list ---------   
+router.post('/:userId/all-devices-not-in', async (req, res) => {
+  const userId = req.params.userId;
+  const devicesMacs = req.body.map(String);
+
+  try {
+    const hubsRef = ref(dbRef, `users/${userId}/hubs`);
+    const snapshotHub = await get(hubsRef);
+    const hubs = snapshotHub.val();
+
+    if (hubs) {
+      let allDevices = [];
+
+      for (const hubId in hubs) {
+        const hubDevicesRef = ref(dbRef, `users/${userId}/hubs/${hubId}/devices`);
+        const snapshotDevices = await get(hubDevicesRef);
+        const devices = snapshotDevices.val();
+
+        if (devices) {
+          allDevices = allDevices.concat(Object.values(devices));
+        }
+      }
+
+      if (allDevices.length > 0) {
+        const devicesNotInList = allDevices.filter(deviceId => !devicesMacs.includes(deviceId));
+
+        if (devicesNotInList.length > 0) {
+          // Retrieve details for each device
+          const deviceDetailsPromises = devicesNotInList.map(async (deviceId) => {
+            const deviceRef = ref(dbRef, `devices/${deviceId}`);
+            const deviceSnapshot = await get(deviceRef);
+            const deviceDetails = deviceSnapshot.val();
+            return deviceDetails;
+          });
+          const deviceDetails = await Promise.all(deviceDetailsPromises);
+
+          return res.json({
+            message: "Devices found successfully",
+            devices: deviceDetails
+          });
+        } else {
+          return res.status(404).send("No devices found for the user's hubs that are not in the list.");
+        }
+      } else {
+        return res.status(404).send("No devices found for the user's hubs.");
+      }
+    } else {
+      return res.status(404).send(`Hubs for user with ID ${userId} not found.`);
+    }
+  } catch (error) {
+    console.error('Error fetching devices:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
 
 // --------- Routes with userID and hubId --------- 
 router

@@ -10,10 +10,10 @@ const scheduleRouter = require('./routes/schedules')
 const deviceRouter = require('./routes/devices')
 
 // Middleware to log requests
-// app.use((req, res, next) => {
-//     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`)
-//     next()
-// })
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`)
+    next()
+})
 
 app.use(express.json());
 

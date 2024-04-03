@@ -20,11 +20,11 @@ const addSimpleDevice = async (resource, userId, resourceId, newDevice) => {
         let devices = snapshot.val() || [];
 
         // Check if the device already exists
-        if (devices.includes(newDevice.macAddress)) {
+        if (devices.includes(newDevice.deviceMAC)) {
             return { success: false, message: `Device with the same MAC address already exists in the ${resourceType}.` };
         }
 
-        devices.push(newDevice.macAddress);
+        devices.push(newDevice.deviceMAC);
         await set(userResourceRef, devices);
 
         return { success: true, message: 'Device added successfully.', resourceType: devices };

@@ -49,6 +49,28 @@ router.post('/', async (req, res) => {
     }
 })
 
+router.post('/in-list', async(req, res) => {
+    try {
+        const devicesRef = ref(dbRef, 'devices');
+        const snapshot = await get(devicesRef);
+        const allDevices = snapshot.val() || {};
+
+        const devices = req.body.map(String)
+
+        const allDeviceKeys = Object.keys(allDevices).filter(key => allDevices[key] !== null);
+
+        const notDevicesKeys = allDeviceKeys.filter(device => devices.some(d => d && d === device));
+        const notDevices = notDevicesKeys.map(key => allDevices[key]);
+
+        return res.status(200).json({
+            message: "Devices found successfully",
+            devices: notDevices
+        });
+    } catch (error) {
+        console.error('Error fetching devices:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
 
 router.post('/not-in', async (req, res) => {
     try {

@@ -20,7 +20,15 @@ router
 
         const schedules = snapshot.val();
         if (schedules) {
-          const schedulesArray = Object.keys(schedules).map(key => schedules[key]);
+
+          const schedulesArray = Object.keys(schedules).map(key => {
+            const schedule = schedules[key];
+            if (!schedule.hasOwnProperty('days')) {
+              schedule.days = [0, 1, 2, 3, 4, 5, 6]; 
+            }
+            return schedule;
+          });
+
           return res.json({
             message: "Schedules data found successfully",
             schedules: schedulesArray
@@ -88,6 +96,16 @@ router.get('/top3/:userId', async (req, res) => {
       const inactiveSchedules = Object.values(schedules).filter((schedule) => !schedule.isActive);
       const resultSchedules = activeSchedules.concat(inactiveSchedules.slice(0, Math.max(0, 3 - activeSchedules.length)));
 
+      // Verify and complete schedules without 'days' property
+      resultSchedules.forEach(schedule => {
+        if (!schedule.hasOwnProperty('devices')) {
+          schedule.devices = []; // Add default days array if not present
+        }
+        if (!schedule.hasOwnProperty('days')) {
+          schedule.days = [0, 1, 2, 3, 4, 5, 6]; // Add default days array if not present
+        }
+      });
+
       return res.json({
         message: "Top 3 schedules found successfully",
         schedules: resultSchedules
@@ -100,6 +118,7 @@ router.get('/top3/:userId', async (req, res) => {
     return res.status(500).send('Internal Server Error');
   }
 });
+
     
 
 // --------- Routes with userID and scheduleId --------- 
@@ -117,6 +136,9 @@ router
         if (schedule) {
           if (!schedule.hasOwnProperty('devices')) {
             schedule.devices = [];
+          }
+          if (!schedule.hasOwnProperty('days')) {
+            schedule.days = [0, 1, 2, 3, 4, 5, 6];
           }
           return res.json({
             message: "Schedule found successfully",

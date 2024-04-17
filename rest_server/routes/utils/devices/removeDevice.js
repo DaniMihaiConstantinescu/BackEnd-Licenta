@@ -1,5 +1,5 @@
 const { ref, set, get } = require('firebase/database');
-const { dbRef } = require('../../firebase');
+const { dbRef } = require('../../../firebase');
 
 const deleteDevice = async (resource, userId, resourceId, macAddress) => {
     try {

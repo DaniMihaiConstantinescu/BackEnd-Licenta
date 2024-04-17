@@ -3,9 +3,10 @@ const router = express.Router()
 
 const { ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
-const { addSimpleDevice } = require('./func/addSimpleDevice')
-const { deleteSimpleDevice } = require('./func/removeSimpleDevice')
-
+const { addSimpleDevice } = require('./utils/devices/addSimpleDevice')
+const { deleteSimpleDevice } = require('./utils/devices/removeSimpleDevice')
+const { findHubIdByMac } = require('./utils/hub/getHubId');
+const { removeDeviceFromOtherLocations } = require('./utils/hub/removeDeviceFromRest');
 
 // --------- Routes only with userID --------- 
 router
@@ -310,28 +311,69 @@ router
 
 
 // --------- Add device to hub ---------   
-router.post('/:userId/:hubId/add-device', async (req, res) => {
+router.post('/add-device/:userId/:hubMac', async (req, res) => {
   const userId = req.params.userId;
-  const hubId = req.params.hubId;
+  const hubMac = req.params.hubMac;
   const newDevice = req.body;
 
-  const result = await addSimpleDevice('hubs', userId, hubId, newDevice);
+  try {
+    const hubId = await findHubIdByMac(userId, hubMac);
 
-  if (result.success) {
-    return res.status(201).json({ message: result.message, hub: result.hub });
-  } else {
-    return res.status(400).json({ error: result.message });
+    if (!hubId) {
+      return res.status(404).json({ error: 'Hub with MAC address not found.' });
+    }
+
+    const result = await addSimpleDevice('hubs', userId, hubId, newDevice);
+
+    if (result.success) {
+
+      // add device to devices collection
+      const { deviceMAC, hubMac, name, type } = newDevice;
+      if (!deviceMAC || !hubMac || !name || !type) {
+          return res.status(400).json({ error: 'Invalid request body' });
+      }
+
+      const devicesRef = ref(dbRef, `devices/${deviceMAC}`);
+      
+      // Check if the device already exists
+      const snapshot = await get(devicesRef);
+      if (snapshot.exists()) {
+          return res.status(400).json({ error: `Device with MAC address ${deviceMAC} already exists` });
+      }
+
+      const deviceData = {
+          deviceMAC,
+          hubMac,
+          name,
+          type
+      };
+      await set(devicesRef, deviceData);
+
+      return res.status(201).json({ message: result.message, hub: result.hub });
+    } else {
+      return res.status(400).json({ error: result.message });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
 // --------- Remove device from hub ---------   
-router.post('/:userId/:hubId/:macAddress', async (req, res) => {
+router.delete('/:userId/:hubId/:macAddress', async (req, res) => {
   const userId = req.params.userId;
-  const hubId = req.params.hubId;
+  const hubMac = req.params.hubId;
   const macAddress = req.params.macAddress;
 
   try {
+    const hubId = await findHubIdByMac(userId, hubMac);
+
+    if (!hubId) {
+      return res.status(404).json({ error: 'Hub with MAC address not found.' });
+    }
     const result = await deleteSimpleDevice('hubs', userId, hubId, macAddress);
+    removeDeviceFromOtherLocations(userId, macAddress);
+
     return res.status(201).json({ message: result.message, hub: result.hub });
   } catch (error) {
     if (error.message.includes('not found')) {

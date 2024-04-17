@@ -17,9 +17,9 @@ const deviceRouter = require('./routes/devices')
 
 app.use(express.json());
 
-app.get('/test', (req, res) =>{
-    res.json({"message": "Hello"})
-})
+// app.get('/test', (req, res) =>{
+//     res.json({"message": "Hello"})
+// })
 
 app.use('/hubs', hubRouter)
 app.use('/rooms', roomRouter)

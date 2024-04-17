@@ -3,8 +3,8 @@ const router = express.Router()
 
 const { ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
-const { addDevice } = require('./func/addDevice')
-const { deleteDevice } = require('./func/removeDevice')
+const { addDevice } = require('./utils/devices/addDevice')
+const { deleteDevice } = require('./utils/devices/removeDevice')
 
 
 // --------- Routes only with userID --------- 

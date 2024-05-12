@@ -7,6 +7,7 @@ const { addSimpleDevice } = require('./utils/devices/addSimpleDevice')
 const { deleteSimpleDevice } = require('./utils/devices/removeSimpleDevice')
 const { findHubIdByMac } = require('./utils/hub/getHubId');
 const { removeDeviceFromOtherLocations } = require('./utils/hub/removeDeviceFromRest');
+const { createNewHub } = require('./utils/hub/createNewHub');
 
 // --------- Routes only with userID --------- 
 router
@@ -317,10 +318,13 @@ router.post('/add-device/:userId/:hubMac', async (req, res) => {
   const newDevice = req.body;
 
   try {
-    const hubId = await findHubIdByMac(userId, hubMac);
-
+    let hubId = await findHubIdByMac(userId, hubMac);
     if (!hubId) {
-      return res.status(404).json({ error: 'Hub with MAC address not found.' });
+      const createdHub = await createNewHub(userId, hubMac)
+      hubId = createdHub.hubId;
+      if (!createdHub) {
+        return res.status(500).json({ error: 'Failed to create hub' });
+      }
     }
 
     const result = await addSimpleDevice('hubs', userId, hubId, newDevice);

@@ -5,6 +5,7 @@ const { ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
 const { addDevice } = require('./utils/devices/addDevice')
 const { deleteDevice } = require('./utils/devices/removeDevice')
+const { activateScene } = require("./utils/routines/activateScene")
 
 
 // --------- Routes only with userID --------- 
@@ -259,6 +260,11 @@ router.post('/toggle/:userId/:sceneId', async (req, res) => {
 
       // Update the scene in the database
       await set(userSceneRef, scene);
+
+      if (scene.isActive) {
+        // Send message to hub to activate scene 
+        activateScene(scene)
+      }
 
       res.json({ 
         message: `Scene with ID ${sceneId} toggled for user with ID ${userId}.`,

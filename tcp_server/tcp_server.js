@@ -9,19 +9,17 @@ const server = net.createServer((socket) => {
   
   socket.on('data', (data) => {
     process_recived(JSON.parse(data.toString()), socket, ipMacMap)
-    sendDataToClient(socket, "message " + index);
-    index++;
   });
 
   socket.on('end', () => {
-    console.log("Before delete: ", ipMacMap.keys());
+    // console.log("Before delete: ", ipMacMap.keys());
     for (const [mac, s] of ipMacMap) {
       if (s === socket) {
           ipMacMap.delete(mac);
           break;
       }
     }
-    console.log("After delete: ", ipMacMap.keys());
+    // console.log("After delete: ", ipMacMap.keys());
     console.log('Client disconnected: ' + socket.remoteAddress);
   });
 

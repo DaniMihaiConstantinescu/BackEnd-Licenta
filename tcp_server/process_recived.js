@@ -39,19 +39,25 @@ function handleHub(data, socket, ipMacMap){
 function handleClient(data, socket, ipMacMap){
     console.log();
     console.log("Client sent");
+    console.log(data);
 
-    const {device, deviceMac, hubMac} = data
-    console.log("hub mac: ", hubMac);
-    console.log("device mac: ", deviceMac);
-    console.log("device settings: ",device);
+    const {devices} = data
 
-    // forword message to the hub without message type and hubMac
-    const hubSocket = ipMacMap.get(hubMac);
-    if (hubSocket) {
-        hubSocket.write(JSON.stringify(data));
-    } else {
-        console.log(`Hub socket not found for MAC address: ${hubMac}`);
-    }
+    devices.forEach(device => {
+        const {settings, deviceMac} = device
+        
+    //     forward message to the hub without message type and hubMac
+        const hubSocket = ipMacMap.get(device.hubMac);
+        if (hubSocket) {
+            hubSocket.write(JSON.stringify({
+                settings,
+                deviceMac,
+            }));
+        } else {
+            console.log(`Hub socket not found for MAC address: ${device.hubMac}`);
+        }
+
+    });
 }
 
 module.exports = { process_recived }

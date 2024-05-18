@@ -22,9 +22,18 @@ router
 
         const hubs = snapshot.val();
         if (hubs) {
+
+          const hubsArray = Object.keys(hubs).map(key => {
+            const room = hubs[key];
+            if (!room.hasOwnProperty('devices')) {
+              room.devices = [];
+            }
+            return room;
+          });
+
           return res.json({
             message: "Hubs data found successfully",
-            hubs: hubs
+            hubs: hubsArray
           });
         } else {
           return res.status(404).send(`User with ID ${userId} not found.`);

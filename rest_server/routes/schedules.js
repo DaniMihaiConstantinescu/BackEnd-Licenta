@@ -5,7 +5,12 @@ const { ref, push, set, get } = require('firebase/database');
 const { dbRef } = require('../firebase');
 const { addDevice } = require('./utils/devices/addDevice')
 const { deleteDevice } = require('./utils/devices/removeDevice')
+const { addSchedule, removeSchedule, getAllActiveHubs } = require('./utils/routines/handleSchedule')
 
+
+router.get('/all-active-schedules', async (req, res) => {
+  getAllActiveHubs(res)
+})
 
 // --------- Routes only with userID --------- 
 router
@@ -301,6 +306,15 @@ router.post('/toggle/:userId/:scheduleId', async (req, res) => {
 
       // Update the schedule in the database
       await set(userScheduleRef, schedule);
+      
+      if (schedule.isActive) {
+        // Add schedule to routine list 
+        addSchedule(schedule)
+      } else {
+        // Remove schedule from routine list
+        removeSchedule(schedule)
+      }
+      
 
       return res.json({ 
         message: `Schedule with ID ${scheduleId} toggled for user with ID ${userId}.`,

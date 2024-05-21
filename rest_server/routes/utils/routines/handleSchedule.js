@@ -43,11 +43,14 @@ const addSchedule = async (schedule) => {
 
     client.connect(PORT, HOST, async () => {
         try{
-        // console.log(`Connected to server ${HOST}:${PORT}`);
+        console.log(`Connected to server ${HOST}:${PORT}`);
 
         // after connecting send the command
         for ( const device of schedule.devices ) {
             const hubMac = await getHubMAC(device.macAddress)
+            if (!schedule.days) {
+                schedule.days = [0, 1, 2, 3, 4, 5, 6]
+            }
             if (hubMac) {
                 client.write(JSON.stringify({
                     "schedule_id": schedule.scheduleId,
@@ -132,6 +135,9 @@ async function extractActiveSchedulesWithDevices(scheduleData) {
         if (schedule.isActive && schedule.hasOwnProperty('devices')) {
             for(const device of schedule.devices){
                 const hubMac = await getHubMAC(device.macAddress)
+                if (!schedule.days) {
+                    schedule.days = [0, 1, 2, 3, 4, 5, 6]
+                }
                 if (hubMac) {
                     schedulesArray.push({
                         "schedule_id": schedule.scheduleId,

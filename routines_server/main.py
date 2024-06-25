@@ -8,15 +8,22 @@ from utils.tcp_handle import send_routines_list
 
 
 def checkRoutines():
+    active_routines = []
+
     while True:
         time_now = datetime.now()
         print(f"Checking routines at {time_now.strftime('%H:%M:%S')}")
         with routines_lock:
             for r in routines:
                 if is_routine_active(r):
-                    # TODO: Send command to TCP server
+                    active_routines.append(r)
                     print(f"Routine scheduled at {r.from_time}-{r.until_time} is active.")
         print()
+
+        # Send the active routines to TCP server with small delay between
+        threading.Thread(target=send_routines_list, args=(active_routines,)).start()
+
+        active_routines = []
 
         # Sleep until the start of the next minute
         time_now = datetime.now()
@@ -40,7 +47,7 @@ if __name__ == '__main__':
                 routines_to_send.append(routine)
                 print(f"Routine scheduled at {routine.from_time}- {routine.until_time} is active.")
 
-    # Send the routines to TCP server with small delay between
+    # Send the active routines to TCP server with small delay between
     threading.Thread(target=send_routines_list, args=(routines_to_send,)).start()
 
     # Calculate initial sleep time to align with the start of the next minute

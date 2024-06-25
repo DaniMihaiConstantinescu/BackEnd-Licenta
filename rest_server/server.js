@@ -9,17 +9,9 @@ const sceneRouter = require('./routes/scenes')
 const scheduleRouter = require('./routes/schedules')
 const deviceRouter = require('./routes/devices')
 
-// Middleware to log requests
-// app.use((req, res, next) => {
-//     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`)
-//     next()
-// })
 
 app.use(express.json());
 
-// app.get('/test', (req, res) =>{
-//     res.json({"message": "Hello"})
-// })
 
 app.use('/hubs', hubRouter)
 app.use('/rooms', roomRouter)

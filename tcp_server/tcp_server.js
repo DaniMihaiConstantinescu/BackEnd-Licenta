@@ -4,7 +4,6 @@ const {process_recived} = require('./process_recived')
 const ipMacMap = new Map();
 
 const server = net.createServer((socket) => {
-  let index = 0;
   console.log('Client connected: ' + socket.remoteAddress);
   
   socket.on('data', (data) => {
